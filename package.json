@@ -1,0 +1,22 @@
+{
+    "name": "page",
+    "version": "1.0.0",
+    "main": "web/index.js",
+    "license": "UNLICENSED",
+    "scripts": {
+        "shopify": "shopify",
+        "build": "shopify app build",
+        "dev": "shopify app dev",
+        "info": "shopify app info",
+        "scaffold": "shopify app scaffold",
+        "deploy": "shopify app deploy"
+    },
+    "dependencies": {
+        "@ckeditor/ckeditor5-build-classic": "^34.2.0",
+        "@ckeditor/ckeditor5-react": "^5.0.2",
+        "@shopify/app": "3.3.3",
+        "@shopify/cli": "3.3.3",
+        "sass": "^1.54.0"
+    },
+    "author": "AHDAM"
+}

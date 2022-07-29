@@ -1,0 +1,11 @@
+// @import 'normalize.css';
+// @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+.ck-editor__editable_inline {
+    min-height: 150px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.ck.ck-editor__main {
+}
