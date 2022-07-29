@@ -1,19 +1,8 @@
-import { useNavigate, Loading } from '@shopify/app-bridge-react';
-import {
-    Banner,
-    Card,
-    EmptyState,
-    FooterHelp,
-    Icon,
-    Layout,
-    Link,
-    Page,
-    SkeletonBodyText,
-    Tabs,
-} from '@shopify/polaris';
 import { useCallback, useState } from 'react';
+import { useNavigate, Loading } from '@shopify/app-bridge-react';
+import { Banner, Card, EmptyState, FooterHelp, Layout, Link, Page, SkeletonBodyText, Tabs } from '@shopify/polaris';
+
 import ResourceListPage from '../components/ResourceListPage';
-import { ExternalSmallMinor } from '@shopify/polaris-icons';
 
 export default function HomePage() {
     /*
@@ -43,19 +32,9 @@ export default function HomePage() {
             panelID: 'all-customers-content-1',
         },
         {
-            id: 'accepts-marketing-1',
-            content: 'Accepts marketing',
-            panelID: 'accepts-marketing-content-1',
-        },
-        {
-            id: 'repeat-customers-1',
-            content: 'Repeat customers',
-            panelID: 'repeat-customers-content-1',
-        },
-        {
-            id: 'prospects-1',
-            content: 'Prospects',
-            panelID: 'prospects-content-1',
+            id: 'search-customers-1',
+            content: 'Custom search',
+            panelID: 'search-customers-content-1',
         },
     ];
 

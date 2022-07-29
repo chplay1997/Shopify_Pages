@@ -1,26 +1,17 @@
-import { ContextualSaveBar, TitleBar } from '@shopify/app-bridge-react';
-import { ArrowLeftMinor, TypeMajor } from '@shopify/polaris-icons';
+import { useCallback, useState } from 'react';
 import {
     Card,
     Page,
     Layout,
     TextContainer,
-    Heading,
     TextField,
     FormLayout,
-    Labelled,
-    Stack,
-    ButtonGroup,
-    Button,
-    Tooltip,
-    Popover,
     ChoiceList,
     Select,
     PageActions,
 } from '@shopify/polaris';
-import ButtonPopover from '../components/ButtonPopover';
+
 import Editor from '../components/Editor';
-import { useCallback, useState } from 'react';
 
 export default function PageName() {
     const [selected, setSelected] = useState(['Hidden']);
