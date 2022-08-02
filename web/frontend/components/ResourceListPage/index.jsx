@@ -1,24 +1,22 @@
-import {
-    Filters,
-    Button,
-    ResourceList,
-    Avatar,
-    ResourceItem,
-    TextStyle,
-    ChoiceList,
-    ButtonGroup,
-} from '@shopify/polaris';
+import { Filters, Button, ResourceList, ResourceItem, TextStyle, ChoiceList, ButtonGroup } from '@shopify/polaris';
 import { StarOutlineMinor } from '@shopify/polaris-icons';
 import { useState, useCallback } from 'react';
+import { useAuthenticatedFetch } from '../../hooks';
+
 import ButtonSort from '../ButtonSort';
 
-function ResourceListPage() {
+function ResourceListPage(props) {
+    const fetchAPI = useAuthenticatedFetch();
     const [selectedItems, setSelectedItems] = useState([]);
     const [sortValue, setSortValue] = useState('DATE_MODIFIED_DESC');
     const [taggedWith, setTaggedWith] = useState('');
-    const [queryValue, setQueryValue] = useState(null);
+    const [queryValue, setQueryValue] = useState('');
     const [selected, setSelected] = useState(['hidden']);
     const [popoverActive, setPopoverActive] = useState(true);
+
+    const regex = /(<([^>]+)>)/gi;
+
+    const [pages, setPages] = useState(props.pages);
 
     const togglePopoverActive = useCallback(() => setPopoverActive((popoverActive) => !popoverActive), []);
     const activator = <Button onClick={togglePopoverActive}>Sales channels</Button>;
@@ -26,7 +24,11 @@ function ResourceListPage() {
     const handleTaggedWithChange = useCallback((value) => setTaggedWith(value), []);
     const handleQueryValueChange = useCallback((value) => setQueryValue(value), []);
     const handleTaggedWithRemove = useCallback(() => setTaggedWith(null), []);
-    const handleQueryValueRemove = useCallback(() => setQueryValue(null), []);
+
+    const handleQueryValueRemove = useCallback(() => {
+        setQueryValue('');
+    }, []);
+
     const handleClearAll = useCallback(() => {
         handleTaggedWithRemove();
         handleQueryValueRemove();
@@ -36,23 +38,6 @@ function ResourceListPage() {
         singular: 'page',
         plural: 'pages',
     };
-
-    const items = [
-        {
-            id: 112,
-            url: 'customers/341',
-            name: 'Mae Jemison',
-            location: 'Decatur, USA',
-            latestOrderUrl: 'orders/1456',
-        },
-        {
-            id: 212,
-            url: 'customers/256',
-            name: 'Ellen Ochoa',
-            location: 'Los Angeles, USA',
-            latestOrderUrl: 'orders/1457',
-        },
-    ];
 
     const bulkActions = [
         {
@@ -72,19 +57,6 @@ function ResourceListPage() {
 
     const filters = [
         {
-            // key: 'taggedWith3',
-            // label: 'Tagged with',
-            // filter: (
-            //     <TextField
-            //         label="Tagged with"
-            //         value={taggedWith}
-            //         onChange={handleTaggedWithChange}
-            //         autoComplete="off"
-            //         labelHidden
-            //     />
-            // ),
-            // shortcut: true,
-
             key: 'taggedWith3',
             label: 'Visibility',
             filter: (
@@ -97,6 +69,7 @@ function ResourceListPage() {
                     ]}
                     selected={selected}
                     onChange={handleTaggedWithChange}
+                    onClearAll={handleClearAll}
                 />
             ),
             shortcut: true,
@@ -121,7 +94,7 @@ function ResourceListPage() {
             appliedFilters={appliedFilters}
             onQueryChange={handleQueryValueChange}
             onQueryClear={handleQueryValueRemove}
-            onClearAll={handleClearAll}
+            // onClearAll={handleClearAll}
         >
             <div style={{ paddingLeft: '8px' }}>
                 <ButtonGroup>
@@ -138,7 +111,7 @@ function ResourceListPage() {
     return (
         <ResourceList
             resourceName={resourceName}
-            items={items}
+            items={pages}
             renderItem={renderItem}
             selectedItems={selectedItems}
             onSelectionChange={setSelectedItems}
@@ -156,31 +129,27 @@ function ResourceListPage() {
         />
     );
 
+    //Render pages
     function renderItem(item) {
-        const { id, url, name, location, latestOrderUrl } = item;
-        const media = <Avatar customer size="medium" name={name} />;
-        const shortcutActions = latestOrderUrl
-            ? [
-                  {
-                      content: 'View page',
-                      accessibilityLabel: `View ${name}’s latest order`,
-                      url: latestOrderUrl,
-                  },
-              ]
-            : null;
+        if (pages.length === 0) {
+            return (
+                <ResourceItem>
+                    <h3>
+                        <TextStyle variation="strong">{'Empty'}</TextStyle>
+                    </h3>
+                </ResourceItem>
+            );
+        }
+        const { id, title, body_html, updated_at } = item;
+        let time = Number.parseInt((new Date() - new Date(updated_at)) / 60000);
+        let viewTime = time < 1 ? 'Just now' : time + ' minutes ago';
         return (
-            <ResourceItem
-                id={id}
-                url={url}
-                media={media}
-                accessibilityLabel={`View details for ${name}`}
-                shortcutActions={shortcutActions}
-                // persistActions
-            >
+            <ResourceItem id={id} accessibilityLabel={`View details for ${title}`} name={title}>
                 <h3>
-                    <TextStyle variation="strong">{name}</TextStyle>
+                    <TextStyle variation="strong">{title}</TextStyle>
                 </h3>
-                <div>{location}</div>
+                <div>{body_html.replace(regex, '')}</div>
+                <div>{viewTime}</div>
             </ResourceItem>
         );
     }

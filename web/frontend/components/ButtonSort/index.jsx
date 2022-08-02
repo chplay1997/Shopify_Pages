@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 import { SortMinor } from '@shopify/polaris-icons';
 
 function ButtonSort() {
-    const [popoverActive, setPopoverActive] = useState(true);
+    const [popoverActive, setPopoverActive] = useState(false);
     const [selected, setSelected] = useState(['Newest update']);
 
     const togglePopoverActive = useCallback(() => setPopoverActive((popoverActive) => !popoverActive), []);

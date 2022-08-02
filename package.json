@@ -16,6 +16,7 @@
         "@ckeditor/ckeditor5-react": "^5.0.2",
         "@shopify/app": "3.3.3",
         "@shopify/cli": "3.3.3",
+        "recoil": "^0.7.4",
         "sass": "^1.54.0"
     },
     "author": "AHDAM"

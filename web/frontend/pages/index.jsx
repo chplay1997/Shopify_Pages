@@ -1,26 +1,47 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, Loading } from '@shopify/app-bridge-react';
-import { Banner, Card, EmptyState, FooterHelp, Layout, Link, Page, SkeletonBodyText, Tabs } from '@shopify/polaris';
+import {
+    Card,
+    EmptyState,
+    FooterHelp,
+    Layout,
+    Link,
+    Page,
+    SkeletonBodyText,
+    SkeletonDisplayText,
+    SkeletonPage,
+    Spinner,
+    Tabs,
+    TextContainer,
+} from '@shopify/polaris';
 
+import { useAuthenticatedFetch } from '../hooks';
 import ResourceListPage from '../components/ResourceListPage';
+import BannerAccess from '../components/BannerAccess';
 
 export default function HomePage() {
-    /*
-    Add an App Bridge useNavigate hook to set up the navigate function.
-    This function modifies the top-level browser URL so that you can
-    navigate within the embedded app and keep the browser in sync on reload.
-  */
+    const fetchAPI = useAuthenticatedFetch();
     const navigate = useNavigate();
-
-    /*
-    These are mock values. Setting these values lets you preview the loading markup and the empty state.
-  */
-    const isLoading = false;
-    const isRefetching = false;
-    const QRCodes = [1];
-
-    /* Card */
+    const [pages, setPages] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     const [selected, setSelected] = useState(0);
+
+    //Get all pages
+    useEffect(() => {
+        setIsLoading(true);
+        const options = {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        };
+        fetchAPI('/api/pages', options)
+            .then((res) => res.json())
+            .then((data) => {
+                setIsLoading(false);
+                setPages(data);
+                console.log(data);
+            })
+            .catch((err) => console.log(err));
+    }, []);
 
     const handleTabChange = useCallback((selectedTabIndex) => setSelected(selectedTabIndex), []);
 
@@ -40,70 +61,81 @@ export default function HomePage() {
 
     /* loadingMarkup uses the loading component from AppBridge and components from Polaris  */
     const loadingMarkup = isLoading ? (
-        <Card sectioned>
-            <Loading />
-            <SkeletonBodyText />
-        </Card>
+        <SkeletonPage fullWidth>
+            <Layout>
+                <Layout.Section>
+                    {/* <SkeletonTabs /> */}
+                    <Card sectioned>
+                        <TextContainer>
+                            <SkeletonDisplayText size="small" />
+                            <SkeletonBodyText />
+                        </TextContainer>
+                    </Card>
+                    <Card sectioned>
+                        <Spinner center accessibilityLabel="Spinner example" size="large" />
+                    </Card>
+                </Layout.Section>
+            </Layout>
+        </SkeletonPage>
     ) : null;
 
     /* Use Polaris Card and EmptyState components to define the contents of the empty state */
-    const emptyStateMarkup =
-        isLoading && !QRCodes?.length ? (
+    const emptyPagesMarkup =
+        !isLoading && !pages?.length ? (
             <Card sectioned>
                 <EmptyState
-                    heading="Create unique QR codes for your product"
-                    /* This button will take the user to a Create a QR code page */
+                    heading="Add pages to your online store"
                     action={{
-                        content: 'Create QR code',
-                        onAction: () => navigate('/qrcodes/new'),
+                        content: 'Add page',
+                        onAction: () => navigate('/new'),
                     }}
-                    image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+                    image="https://cdn.shopify.com/shopifycloud/online-store-web/assets/8001a44e37248e13f435f27aac113bf41ef8c7b78c5a460e9c77137b887b37c0.svg"
                 >
-                    <p>Allow customers to scan codes and buy products using their phones.</p>
+                    <p>
+                        Write clear page titles and descriptions to improve your search engine optimization (SEO) and
+                        help customers find your website.
+                    </p>
                 </EmptyState>
             </Card>
         ) : null;
 
-    /*
-    Use Polaris Page and TitleBar components to create the page layout,
-    and include the empty state contents set above.
-  */
+    const pagesMarkup = pages?.length ? (
+        <Card>
+            <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange}>
+                <ResourceListPage pages={pages} />
+            </Tabs>
+        </Card>
+    ) : null;
+
     return (
         <Page
-            fullWidth
+            fullWidth={pages.length || isLoading ? true : false}
             title="Pages"
             primaryAction={{
-                content: 'Add Pages',
+                content: 'Add page',
                 onAction: () => navigate('/new'),
             }}
         >
             <Layout>
+                <Layout.Section>{!isLoading && <BannerAccess />}</Layout.Section>
+
                 <Layout.Section>
-                    <Banner
-                        title="Store access is restricted"
-                        status="warning"
-                        action={{ content: 'See store password', url: '/preferences' }}
-                    >
-                        <p>While your online store is in development, only visitors with the password can access it.</p>
-                    </Banner>
-                </Layout.Section>
-                <Layout.Section>
-                    <Card>
-                        <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange}>
-                            <ResourceListPage />
-                        </Tabs>
-                    </Card>
+                    {loadingMarkup}
+                    {emptyPagesMarkup}
+                    {pagesMarkup}
                 </Layout.Section>
             </Layout>
-            <FooterHelp>
-                Learn more about{' '}
-                <Link
-                    url="https://help.shopify.com/en/manual/sell-online/online-store/pages?st_source=admin&amp;st_campaign=pages_footer&amp;utm_source=admin&amp;utm_campaign=pages_footer"
-                    external
-                >
-                    pages
-                </Link>
-            </FooterHelp>
+            {!isLoading && (
+                <FooterHelp>
+                    Learn more about{' '}
+                    <Link
+                        url="https://help.shopify.com/en/manual/sell-online/online-store/pages?st_source=admin&amp;st_campaign=pages_footer&amp;utm_source=admin&amp;utm_campaign=pages_footer"
+                        external
+                    >
+                        pages
+                    </Link>
+                </FooterHelp>
+            )}
         </Page>
     );
 }
