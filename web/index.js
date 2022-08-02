@@ -129,6 +129,7 @@ export async function createServer(
         }
     });
 
+    //Create a new page
     app.post('/api/page', express.json(), async (req, res) => {
         try {
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
@@ -141,6 +142,23 @@ export async function createServer(
             });
             res.json({ success: 'success' });
         } catch (error) {
+            res.json(error);
+        }
+    });
+
+    //Get a page by id
+    app.get('/api/page/:id', async (req, res) => {
+        try {
+            console.log(req.params);
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
+            const page = await Page.find({
+                // @ts-ignore
+                session,
+                id: req.params.id,
+            });
+            res.json(page);
+        } catch (error) {
+            console.log('error');
             res.json(error);
         }
     });

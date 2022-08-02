@@ -1,4 +1,13 @@
-import { Filters, Button, ResourceList, ResourceItem, TextStyle, ChoiceList, ButtonGroup } from '@shopify/polaris';
+import {
+    Filters,
+    Button,
+    ResourceList,
+    ResourceItem,
+    TextStyle,
+    ChoiceList,
+    ButtonGroup,
+    Link,
+} from '@shopify/polaris';
 import { StarOutlineMinor } from '@shopify/polaris-icons';
 import { useState, useCallback } from 'react';
 import { useAuthenticatedFetch } from '../../hooks';
@@ -144,7 +153,7 @@ function ResourceListPage(props) {
         let time = Number.parseInt((new Date() - new Date(updated_at)) / 60000);
         let viewTime = time < 1 ? 'Just now' : time + ' minutes ago';
         return (
-            <ResourceItem id={id} accessibilityLabel={`View details for ${title}`} name={title}>
+            <ResourceItem id={id} url={`/${id}`} accessibilityLabel={`View details for ${title}`} name={title}>
                 <h3>
                     <TextStyle variation="strong">{title}</TextStyle>
                 </h3>
