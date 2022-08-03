@@ -118,7 +118,9 @@ export async function createServer(
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
             // @ts-ignore
             const listPage = await Page.all({ session });
-            res.json(listPage);
+            // @ts-ignore
+            const array = [...listPage]?.sort((a, b) => b.created_at.localeCompare(a.created_at));
+            res.json(array);
         } catch (error) {
             console.log('error');
             res.json(error);

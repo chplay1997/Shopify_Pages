@@ -41,7 +41,7 @@ export default function HomePage() {
             .then((data) => {
                 setIsLoading(false);
                 setPages(data);
-                console.log(data);
+                // console.log(data);
             })
             .catch((err) => console.log(err));
     }, []);
@@ -113,7 +113,7 @@ export default function HomePage() {
     return (
         <Frame>
             <Page
-                fullWidth={pages.length || isLoading ? true : false}
+                fullWidth={pages?.length || isLoading ? true : false}
                 title={isLoading ? '' : 'Pages'}
                 primaryAction={
                     !isLoading && {

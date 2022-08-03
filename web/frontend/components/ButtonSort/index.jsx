@@ -1,16 +1,44 @@
 import { Button, Popover, ActionList, ChoiceList } from '@shopify/polaris';
 import { useState, useCallback } from 'react';
 import { SortMinor } from '@shopify/polaris-icons';
+import { useSetRecoilState } from 'recoil';
+import { newPagesState } from '../../recoil';
 
 function ButtonSort() {
     const [popoverActive, setPopoverActive] = useState(false);
-    const [selected, setSelected] = useState(['Newest update']);
+    const [sortValue, setSortValue] = useState(['Newest update']);
+    const setPages = useSetRecoilState(newPagesState);
 
-    const [sortValue, setSortValue] = useState('DATE_MODIFIED_DESC');
+    // console.log(pages);
 
     const togglePopoverActive = useCallback(() => setPopoverActive((popoverActive) => !popoverActive), []);
 
-    const handleChange = useCallback((value) => setSelected(value), []);
+    const handleChange = useCallback((value) => {
+        setSortValue(value);
+        sortPages(value);
+    }, []);
+
+    //Sort the list
+    const sortPages = (type) => {
+        setPages((prev) => {
+            switch (type.toString()) {
+                case 'Newest update':
+                    return [...prev].sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+
+                case 'Oldest update':
+                    return [...prev].sort((a, b) => a.updated_at.localeCompare(b.updated_at));
+
+                case 'Title A–Z':
+                    return [...prev].sort((a, b) => a.title.localeCompare(b.title));
+
+                case 'Title Z–A':
+                    return [...prev].sort((a, b) => b.title.localeCompare(a.title));
+
+                default:
+                    return prev;
+            }
+        });
+    };
 
     const activator = (
         <Button icon={SortMinor} onClick={togglePopoverActive}>
@@ -34,20 +62,9 @@ function ButtonSort() {
                     { label: 'Title A–Z', value: 'Title A–Z' },
                     { label: 'Title Z–A', value: 'Title Z–A' },
                 ]}
-                selected={selected}
+                selected={sortValue}
                 onChange={handleChange}
             />
-            {/* <Popover.Pane fixed>
-                <Popover.Section>
-                    <p>Available sales channels</p>
-                </Popover.Section>
-            </Popover.Pane>
-            <Popover.Pane>
-                <ActionList
-                    actionRole="menuitem"
-                    items={[{ content: 'Online store' }, { content: 'Facebook' }, { content: 'Shopify POS' }]}
-                />
-            </Popover.Pane> */}
         </Popover>
     );
 }
