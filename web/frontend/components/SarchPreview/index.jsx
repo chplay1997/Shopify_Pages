@@ -20,6 +20,13 @@ function SearchPreview() {
 
     //handle focus description
     const handleFocusDescription = () => {
+        if (description == title) {
+            setDescription('');
+        }
+    };
+
+    //handle blur description
+    const handleBlurDescription = () => {
         if (!description) {
             setDescription(content);
         }
@@ -55,7 +62,7 @@ function SearchPreview() {
                 <Card.Section>
                     <p style={{ color: '#1a0dab' }}>{pageTittle || title}</p>
                     <p style={{ color: '#006621' }}>{uri + title}</p>
-                    <p style={{ color: '#545454' }}>{description || content.replace(regex, '')}</p>
+                    <p style={{ color: '#545454' }}>{description.replace(regex, '') || content.replace(regex, '')}</p>
                 </Card.Section>
             );
         } else if (title && !content) {
@@ -103,12 +110,13 @@ function SearchPreview() {
                             multiline={4}
                             onChange={handleSetDescription}
                             onFocus={handleFocusDescription}
+                            onBlur={handleBlurDescription}
                             helpText={`${description.length} of 320 characters used`}
                         />
                         <TextField
                             label="URL and handle"
                             prefix={uri}
-                            placeholder={title}
+                            placeholder={title.replaceAll(' ', '-')}
                             value={url}
                             onChange={handleSetUrl}
                             onFocus={handleFocusUrl}

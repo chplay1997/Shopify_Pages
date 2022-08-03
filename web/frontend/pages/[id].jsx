@@ -1,23 +1,14 @@
 import { useParams } from 'react-router-dom';
-import {
-    Card,
-    Page,
-    Layout,
-    SkeletonBodyText,
-    FormLayout,
-    PageActions,
-    Frame,
-    ContextualSaveBar,
-} from '@shopify/polaris';
+import { Card, Page, Layout, FormLayout, PageActions, Frame, ContextualSaveBar, Banner, Link } from '@shopify/polaris';
 import { ViewMinor, DuplicateMinor } from '@shopify/polaris-icons';
-import { Loading, TitleBar } from '@shopify/app-bridge-react';
+import { Loading } from '@shopify/app-bridge-react';
 import { useAuthenticatedFetch } from '../hooks';
 import { useEffect, useState } from 'react';
 
 import { useNavigate } from '@shopify/app-bridge-react';
 
 import { useRecoilState } from 'recoil';
-import { newMessageError, newContent, newTitle } from '../recoil';
+import { newMessageError, newContent, newTitle, newPageTittle, newDescription, newUrl } from '../recoil';
 
 import ModalConfirm from '../components/ModalConfirm';
 import BannerError from '../components/BannerError';
@@ -25,11 +16,14 @@ import Editor from '../components/Editor';
 import VisibilityPage from '../components/VisibilityPage';
 import SearchPreview from '../components/SarchPreview';
 import InputTitle from '../components/InputTitle';
+import SkeletonSinglePage from '../components/SkeletonSinglePage';
 
 export default function QRCodeEdit() {
     const { id } = useParams();
-    const [isLoading, setIsLoading] = useState(false);
     const fetchAPI = useAuthenticatedFetch();
+    const [isLoading, setIsLoading] = useState(false);
+    const [page, setPage] = useState('');
+    const [showSaveBar, setShowSaveBar] = useState(false);
 
     const navigate = useNavigate();
     const [selected, setSelected] = useState(['Hidden']);
@@ -43,6 +37,27 @@ export default function QRCodeEdit() {
     const [content, setContent] = useRecoilState(newContent);
     const [errorMessage, setErrorMessage] = useRecoilState(newMessageError);
 
+    const [pageTittle, setPageTittle] = useRecoilState(newPageTittle);
+    const [description, setDescription] = useRecoilState(newDescription);
+    const [url, setUrl] = useRecoilState(newUrl);
+
+    //Listen for changes input value and show save bar
+    useEffect(() => {
+        if (!page) {
+            return;
+        }
+        if (title != page.title || content != page.body_html || description || pageTittle || url != page.handle) {
+            setShowSaveBar(true);
+        } else {
+            setShowSaveBar(false);
+        }
+
+        return () => {
+            setShowSaveBar(false);
+        };
+    }, [title, content, pageTittle, description, url]);
+
+    //Get data
     useEffect(() => {
         setIsLoading(true);
         const options = {
@@ -53,12 +68,14 @@ export default function QRCodeEdit() {
             .then((res) => res.json())
             .then((data) => {
                 console.log(data);
-                if (data.hasOwnProperty('success')) {
-                    // setContent('');
-                    // setTitle('');
-                } else {
-                    // setErrorMessage(Object.entries(data.response.body.errors));
-                }
+                setPage(data);
+
+                setTitle(data.title);
+                setContent(data.body_html);
+                // setPageTittle(data.title);
+                // setDescription(data.body_html);
+                setUrl(data.handle);
+
                 setIsLoading(false);
             })
 
@@ -72,21 +89,23 @@ export default function QRCodeEdit() {
     };
 
     //Submit add page
-    const handleSubmitAddPage = () => {
+    const handleUpdatePage = () => {
         setShowLoading(true);
+
         const options = {
-            method: 'POST',
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
             body: JSON.stringify({ title, content }),
         };
-        fetchAPI('/api/page', options)
+        fetchAPI(`/api/page/${page.id}`, options)
             .then((res) => res.json())
             .then((data) => {
                 if (data.hasOwnProperty('success')) {
-                    setContent('');
-                    setTitle('');
+                    setPage((prev) => ({ ...prev, title: title, body_htm: content }));
+                    setShowSaveBar(false);
                 } else {
-                    setErrorMessage(Object.entries(data.response.body.errors));
+                    console.log(data);
+                    setErrorMessage([['id', [data.response.body.errors]]]);
                 }
                 setShowLoading(false);
             })
@@ -95,57 +114,32 @@ export default function QRCodeEdit() {
     };
 
     //Handle delete page
-    const handleDeletePage = (type) => {
-        if (title || content) {
-            if (type === 'cancel') {
-                setDataModal({
-                    title: 'You have unsaved changes',
-                    primaryAction: 'Leave page',
-                    secondaryActions: 'Cancel',
-                    content: 'If you leave this page, all unsaved changes will be lost.',
-                });
-            } else if (type === 'discard') {
-                setDataModal({
-                    title: 'Discard all unsaved changes',
-                    primaryAction: 'Discard changes',
-                    secondaryActions: 'Continue editing',
-                    content: 'If you discard changes, you’ll delete any edits you made since you last saved.',
-                });
-            }
-            setActiveModal(true);
-        } else {
-            navigate('/');
-        }
+    const handleDeletePage = () => {
+        setDataModal({
+            title: `Delete ${page.title}?`,
+            primaryAction: 'Delete',
+            secondaryActions: 'Cancel',
+            content: `Delete “${page.title}”? This can\'t be undone.`,
+            id: [page.id],
+        });
+        setActiveModal(true);
+    };
+
+    //Handle discardChange
+    const handleDiscard = () => {
+        setDataModal({
+            title: 'Discard all unsaved changes',
+            primaryAction: 'Discard changes',
+            secondaryActions: 'Continue editing',
+            content: 'If you discard changes, you’ll delete any edits you made since you last saved.',
+            page: page,
+        });
+        setActiveModal(true);
     };
 
     /* Loading action and markup that uses App Bridge and Polaris components */
     if (isLoading) {
-        return (
-            <Page>
-                <Loading />
-                <Layout>
-                    <Layout.Section>
-                        <Card sectioned title="Title">
-                            <SkeletonBodyText />
-                        </Card>
-                        <Card title="Product">
-                            <Card.Section>
-                                <SkeletonBodyText lines={1} />
-                            </Card.Section>
-                            <Card.Section>
-                                <SkeletonBodyText lines={3} />
-                            </Card.Section>
-                        </Card>
-                        <Card sectioned title="Discount">
-                            <SkeletonBodyText lines={2} />
-                        </Card>
-                    </Layout.Section>
-                    <Layout.Section secondary>
-                        <Card sectioned title="QR code" />
-                    </Layout.Section>
-                </Layout>
-            </Page>
-        );
+        return <SkeletonSinglePage />;
     }
 
     return (
@@ -153,18 +147,19 @@ export default function QRCodeEdit() {
             {/* Modal confirm cancel */}
 
             <ModalConfirm active={activeModal} setActive={setActiveModal} dataModal={dataModal} />
-            {/* <ContextualSaveBar
-                    fullWidth
+
+            {showSaveBar && (
+                <ContextualSaveBar
                     message="Unsaved changes"
                     saveAction={{
-                        onAction: handleSubmitAddPage,
+                        onAction: handleUpdatePage,
                         loading: showLoading,
-                        disabled: content || title ? false : true,
                     }}
                     discardAction={{
-                        onAction: () => handleCancel('discard'),
+                        onAction: handleDiscard,
                     }}
-                /> */}
+                />
+            )}
 
             {showLoading && <Loading />}
 
@@ -187,6 +182,20 @@ export default function QRCodeEdit() {
                             <BannerError errorMessage={errorMessage} />
                         </Layout.Section>
                     )}
+
+                    {/* Use it for features */}
+                    {/* <Layout.Section>
+                        <Banner title={`${page.title} created`} status="success">
+                            <p>
+                                <Link url="#" external>
+                                    {' View on your online store'}
+                                </Link>
+                                {`, `}
+                                <Link onClick={() => navigate('/new')}>create another page</Link> {` or `}
+                                <Link url="#"> add it to your store’s navigation.</Link>
+                            </p>
+                        </Banner>
+                    </Layout.Section> */}
 
                     <Layout.Section>
                         <Card sectioned>
@@ -217,8 +226,8 @@ export default function QRCodeEdit() {
                             primaryAction={[
                                 {
                                     content: 'Save',
-                                    disabled: content || title ? false : true,
-                                    onClick: handleSubmitAddPage,
+                                    disabled: !showSaveBar,
+                                    onClick: handleUpdatePage,
                                 },
                             ]}
                         />

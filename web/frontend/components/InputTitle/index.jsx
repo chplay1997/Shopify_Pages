@@ -20,7 +20,8 @@ function InputTitle(props) {
                 value={title}
                 onChange={handleChangeTitle}
                 autoComplete="off"
-                {...(errorMessage.length > 0 && { error: "Title can't be blank" })}
+                {...(errorMessage?.length > 0 &&
+                    errorMessage[0].includes('title') && { error: "Title can't be blank" })}
             />
         </FormLayout>
     );

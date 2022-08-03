@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, Loading } from '@shopify/app-bridge-react';
+import { useNavigate } from '@shopify/app-bridge-react';
 import {
     Card,
     EmptyState,
     FooterHelp,
+    Frame,
     Layout,
     Link,
     Page,
@@ -18,11 +19,13 @@ import {
 import { useAuthenticatedFetch } from '../hooks';
 import ResourceListPage from '../components/ResourceListPage';
 import BannerAccess from '../components/BannerAccess';
+import { useRecoilState } from 'recoil';
+import { newPagesState } from '../recoil';
 
 export default function HomePage() {
     const fetchAPI = useAuthenticatedFetch();
     const navigate = useNavigate();
-    const [pages, setPages] = useState([]);
+    const [pages, setPages] = useRecoilState(newPagesState);
     const [isLoading, setIsLoading] = useState(false);
     const [selected, setSelected] = useState(0);
 
@@ -70,9 +73,9 @@ export default function HomePage() {
                             <SkeletonDisplayText size="small" />
                             <SkeletonBodyText />
                         </TextContainer>
-                    </Card>
-                    <Card sectioned>
-                        <Spinner center accessibilityLabel="Spinner example" size="large" />
+                        <div className="spinner-center">
+                            <Spinner accessibilityLabel="Spinner loading" size="large" />
+                        </div>
                     </Card>
                 </Layout.Section>
             </Layout>
@@ -108,34 +111,39 @@ export default function HomePage() {
     ) : null;
 
     return (
-        <Page
-            fullWidth={pages.length || isLoading ? true : false}
-            title="Pages"
-            primaryAction={{
-                content: 'Add page',
-                onAction: () => navigate('/new'),
-            }}
-        >
-            <Layout>
-                <Layout.Section>{!isLoading && <BannerAccess />}</Layout.Section>
+        <Frame>
+            <Page
+                fullWidth={pages.length || isLoading ? true : false}
+                title={isLoading ? '' : 'Pages'}
+                primaryAction={
+                    !isLoading && {
+                        content: 'Add page',
+                        onAction: () => navigate('/new'),
+                    }
+                }
+            >
+                <Layout>
+                    <Layout.Section>{!isLoading && <BannerAccess />}</Layout.Section>
 
-                <Layout.Section>
-                    {loadingMarkup}
-                    {emptyPagesMarkup}
-                    {pagesMarkup}
-                </Layout.Section>
-            </Layout>
-            {!isLoading && (
-                <FooterHelp>
-                    Learn more about{' '}
-                    <Link
-                        url="https://help.shopify.com/en/manual/sell-online/online-store/pages?st_source=admin&amp;st_campaign=pages_footer&amp;utm_source=admin&amp;utm_campaign=pages_footer"
-                        external
-                    >
-                        pages
-                    </Link>
-                </FooterHelp>
-            )}
-        </Page>
+                    <Layout.Section>
+                        {loadingMarkup}
+                        {emptyPagesMarkup}
+                        {pagesMarkup}
+                    </Layout.Section>
+                </Layout>
+
+                {!isLoading && (
+                    <FooterHelp>
+                        Learn more about{' '}
+                        <Link
+                            url="https://help.shopify.com/en/manual/sell-online/online-store/pages?st_source=admin&amp;st_campaign=pages_footer&amp;utm_source=admin&amp;utm_campaign=pages_footer"
+                            external
+                        >
+                            pages
+                        </Link>
+                    </FooterHelp>
+                )}
+            </Page>
+        </Frame>
     );
 }

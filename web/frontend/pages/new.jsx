@@ -23,10 +23,11 @@ export default function PageName() {
     const [dataModal, setDataModal] = useState({});
 
     //Recoil state
-    const [title, setTitle] = useRecoilState(newTitle);
+    const [title = '', setTitle] = useRecoilState(newTitle);
     const [content, setContent] = useRecoilState(newContent);
     const [errorMessage, setErrorMessage] = useRecoilState(newMessageError);
 
+    console.log(title);
     const logoFrame = {
         width: 124,
         contextualSaveBarSource:
@@ -47,8 +48,10 @@ export default function PageName() {
                 if (data.hasOwnProperty('success')) {
                     setContent('');
                     setTitle('');
+                    navigate('/');
                 } else {
                     setErrorMessage(Object.entries(data.response.body.errors));
+                    console.log(Object.entries(data.response.body.errors)[0].includes('title'));
                 }
                 setShowLoading(false);
             })
@@ -82,6 +85,7 @@ export default function PageName() {
 
     return (
         <Frame logo={logoFrame}>
+            {showLoading && <Loading />}
             {/* Modal confirm cancel */}
             <ModalConfirm active={activeModal} setActive={setActiveModal} dataModal={dataModal} />
 
@@ -97,59 +101,62 @@ export default function PageName() {
                     onAction: () => handleCancel('discard'),
                 }}
             />
+            <div style={{ marginTop: '50px' }}>
+                <Page
+                    breadcrumbs={[
+                        {
+                            content: 'Settings',
+                            onAction: () => {
+                                handleCancel('cancel');
+                            },
+                        },
+                    ]}
+                    title="Add page"
+                >
+                    <Layout>
+                        {/* Show message error */}
+                        {errorMessage.length > 0 && (
+                            <Layout.Section>
+                                <BannerError errorMessage={errorMessage} />
+                            </Layout.Section>
+                        )}
 
-            {showLoading && <Loading />}
-
-            <Page breadcrumbs={[{ content: 'Settings', url: '/' }]} title="Add page">
-                <Layout>
-                    {/* Show message error */}
-                    {errorMessage.length > 0 && (
                         <Layout.Section>
-                            <BannerError errorMessage={errorMessage} />
+                            <Card sectioned>
+                                <FormLayout>
+                                    <InputTitle />
+                                    <Editor />
+                                </FormLayout>
+                            </Card>
+
+                            {/* Search preview */}
+                            <SearchPreview />
                         </Layout.Section>
-                    )}
 
-                    <Layout.Section>
-                        <Card sectioned>
-                            <FormLayout>
-                                <InputTitle />
-                                <Editor />
-                            </FormLayout>
-                        </Card>
+                        <Layout.Section secondary>
+                            <VisibilityPage selected={selected} setSelected={setSelected} />
+                        </Layout.Section>
 
-                        {/* Search preview */}
-                        <SearchPreview />
-                    </Layout.Section>
-
-                    <Layout.Section secondary>
-                        <VisibilityPage selected={selected} setSelected={setSelected} />
-                    </Layout.Section>
-
-                    <Layout.Section>
-                        <PageActions
-                            secondaryActions={[
-                                {
-                                    content: 'Cancel',
-                                    onClick: () => handleCancel('cancel'),
-                                },
-                                // {
-                                //     destructive: true,
-                                //     outline: true,
-                                //     content: 'Delete page',
-                                //     onClick: handleDeletePage,
-                                // },
-                            ]}
-                            primaryAction={[
-                                {
-                                    content: 'Save',
-                                    disabled: content || title ? false : true,
-                                    onClick: handleSubmitAddPage,
-                                },
-                            ]}
-                        />
-                    </Layout.Section>
-                </Layout>
-            </Page>
+                        <Layout.Section>
+                            <PageActions
+                                secondaryActions={[
+                                    {
+                                        content: 'Cancel',
+                                        onClick: () => handleCancel('cancel'),
+                                    },
+                                ]}
+                                primaryAction={[
+                                    {
+                                        content: 'Save',
+                                        disabled: content || title ? false : true,
+                                        onClick: handleSubmitAddPage,
+                                    },
+                                ]}
+                            />
+                        </Layout.Section>
+                    </Layout>
+                </Page>
+            </div>
         </Frame>
     );
 }

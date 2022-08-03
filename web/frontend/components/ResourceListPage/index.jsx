@@ -1,31 +1,27 @@
-import {
-    Filters,
-    Button,
-    ResourceList,
-    ResourceItem,
-    TextStyle,
-    ChoiceList,
-    ButtonGroup,
-    Link,
-} from '@shopify/polaris';
+import { Filters, Button, ResourceList, ResourceItem, TextStyle, ChoiceList, ButtonGroup } from '@shopify/polaris';
 import { StarOutlineMinor } from '@shopify/polaris-icons';
 import { useState, useCallback } from 'react';
-import { useAuthenticatedFetch } from '../../hooks';
+import { useRecoilState } from 'recoil';
+import { newPagesState } from '../../recoil';
 
 import ButtonSort from '../ButtonSort';
+import ModalConfirm from '../ModalConfirm';
 
 function ResourceListPage(props) {
-    const fetchAPI = useAuthenticatedFetch();
     const [selectedItems, setSelectedItems] = useState([]);
+    const [activeModal, setActiveModal] = useState(false);
+    const [dataModal, setDataModal] = useState({});
+
     const [sortValue, setSortValue] = useState('DATE_MODIFIED_DESC');
+    const [popoverActive, setPopoverActive] = useState(true);
+    const [selected, setSelected] = useState(['hidden']);
+
     const [taggedWith, setTaggedWith] = useState('');
     const [queryValue, setQueryValue] = useState('');
-    const [selected, setSelected] = useState(['hidden']);
-    const [popoverActive, setPopoverActive] = useState(true);
 
     const regex = /(<([^>]+)>)/gi;
 
-    const [pages, setPages] = useState(props.pages);
+    const [pages, setPages] = useRecoilState(newPagesState);
 
     const togglePopoverActive = useCallback(() => setPopoverActive((popoverActive) => !popoverActive), []);
     const activator = <Button onClick={togglePopoverActive}>Sales channels</Button>;
@@ -48,6 +44,19 @@ function ResourceListPage(props) {
         plural: 'pages',
     };
 
+    //Delete list pages
+    const handleDeletePageCheckbox = (e) => {
+        setDataModal({
+            title: `Delete ${selectedItems.length} page?`,
+            primaryAction: `Delete ${selectedItems.length} page`,
+            secondaryActions: 'Cancel',
+            content: `Deleted pages cannot be recovered. Do you still want to continue?`,
+            id: selectedItems,
+            type: 'home',
+        });
+        setActiveModal(true);
+    };
+
     const bulkActions = [
         {
             content: 'Make selected pages visible',
@@ -60,7 +69,7 @@ function ResourceListPage(props) {
         {
             content: 'Delete pages',
             destructive: true,
-            onAction: () => console.log('Todo: implement bulk delete'),
+            onAction: handleDeletePageCheckbox,
         },
     ];
 
@@ -103,7 +112,7 @@ function ResourceListPage(props) {
             appliedFilters={appliedFilters}
             onQueryChange={handleQueryValueChange}
             onQueryClear={handleQueryValueRemove}
-            // onClearAll={handleClearAll}
+            onClearAll={handleClearAll}
         >
             <div style={{ paddingLeft: '8px' }}>
                 <ButtonGroup>
@@ -118,24 +127,23 @@ function ResourceListPage(props) {
     );
 
     return (
-        <ResourceList
-            resourceName={resourceName}
-            items={pages}
-            renderItem={renderItem}
-            selectedItems={selectedItems}
-            onSelectionChange={setSelectedItems}
-            bulkActions={bulkActions}
-            sortValue={sortValue}
-            sortOptions={[
-                { label: 'Newest update', value: 'DATE_MODIFIED_DESC' },
-                { label: 'Oldest update', value: 'DATE_MODIFIED_ASC' },
-            ]}
-            onSortChange={(selected) => {
-                setSortValue(selected);
-                console.log(`Sort option changed to ${selected}.`);
-            }}
-            filterControl={filterControl}
-        />
+        <>
+            <ResourceList
+                resourceName={resourceName}
+                items={pages}
+                renderItem={renderItem}
+                selectedItems={selectedItems}
+                onSelectionChange={setSelectedItems}
+                bulkActions={bulkActions}
+                filterControl={filterControl}
+            />
+            <ModalConfirm
+                active={activeModal}
+                setActive={setActiveModal}
+                dataModal={dataModal}
+                setSelectedItems={setSelectedItems}
+            />
+        </>
     );
 
     //Render pages

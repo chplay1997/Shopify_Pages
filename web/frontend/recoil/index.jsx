@@ -1,5 +1,20 @@
 import { atom, selector } from 'recoil';
 
+//List pages
+const pagesState = atom({
+    key: 'pages',
+    default: [],
+});
+
+export const newPagesState = selector({
+    key: 'newPagesState',
+    get: ({ get }) => {
+        return get(pagesState);
+    },
+    set: ({ set }, newValue) => {
+        set(pagesState, newValue);
+    },
+});
 //Title add page
 const titleState = atom({
     key: 'title',

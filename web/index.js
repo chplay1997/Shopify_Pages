@@ -115,13 +115,9 @@ export async function createServer(
     //Retrieves a list of pages
     app.get('/api/pages', async (req, res) => {
         try {
-            // const { Page } = await import(
-            //     `@shopify/shopify-api/dist/rest-resources/${Shopify.Context.API_VERSION}/index.js`
-            // );
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
             // @ts-ignore
             const listPage = await Page.all({ session });
-            console.log(listPage);
             res.json(listPage);
         } catch (error) {
             console.log('error');
@@ -149,7 +145,6 @@ export async function createServer(
     //Get a page by id
     app.get('/api/page/:id', async (req, res) => {
         try {
-            console.log(req.params);
             const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
             const page = await Page.find({
                 // @ts-ignore
@@ -157,6 +152,46 @@ export async function createServer(
                 id: req.params.id,
             });
             res.json(page);
+        } catch (error) {
+            console.log('error');
+            res.json(error);
+        }
+    });
+
+    //Update a page by id
+    app.put('/api/page/:id', express.json(), async (req, res) => {
+        try {
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
+            // @ts-ignore
+            const page = new Page({ session });
+            page.title = req.body.title;
+            page.body_html = req.body.content;
+            // @ts-ignore
+            page.id = req.params.id + 1;
+            await page.save({
+                update: true,
+            });
+            res.json({ success: 'success' });
+        } catch (error) {
+            console.log(error);
+            res.json(error);
+        }
+    });
+
+    //Delete a page by id
+    app.delete('/api/page/:id', async (req, res) => {
+        try {
+            const listId = req.params.id.split(',');
+            const session = await Shopify.Utils.loadCurrentSession(req, res, app.get('use-online-tokens'));
+            listId.forEach(async (id) => {
+                await Page.delete({
+                    // @ts-ignore
+                    session,
+                    // @ts-ignore
+                    id: id,
+                });
+            });
+            res.json({ success: 'success' });
         } catch (error) {
             console.log('error');
             res.json(error);
