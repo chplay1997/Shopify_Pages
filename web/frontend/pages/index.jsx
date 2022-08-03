@@ -105,7 +105,7 @@ export default function HomePage() {
     const pagesMarkup = pages?.length ? (
         <Card>
             <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange}>
-                <ResourceListPage pages={pages} />
+                <ResourceListPage />
             </Tabs>
         </Card>
     ) : null;

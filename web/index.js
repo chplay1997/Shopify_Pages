@@ -167,7 +167,7 @@ export async function createServer(
             page.title = req.body.title;
             page.body_html = req.body.content;
             // @ts-ignore
-            page.id = req.params.id + 1;
+            page.id = req.params.id;
             await page.save({
                 update: true,
             });

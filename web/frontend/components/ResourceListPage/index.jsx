@@ -1,34 +1,27 @@
 import { Filters, Button, ResourceList, ResourceItem, TextStyle, ChoiceList, ButtonGroup } from '@shopify/polaris';
 import { StarOutlineMinor } from '@shopify/polaris-icons';
 import { useState, useCallback } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import { newPagesState } from '../../recoil';
 
 import ButtonSort from '../ButtonSort';
 import ModalConfirm from '../ModalConfirm';
 
-function ResourceListPage(props) {
+function ResourceListPage() {
     const [selectedItems, setSelectedItems] = useState([]);
     const [activeModal, setActiveModal] = useState(false);
     const [dataModal, setDataModal] = useState({});
 
-    const [sortValue, setSortValue] = useState('DATE_MODIFIED_DESC');
-    const [popoverActive, setPopoverActive] = useState(true);
     const [selected, setSelected] = useState(['hidden']);
-
-    const [taggedWith, setTaggedWith] = useState('');
     const [queryValue, setQueryValue] = useState('');
 
     const regex = /(<([^>]+)>)/gi;
 
-    const [pages, setPages] = useRecoilState(newPagesState);
+    const pages = useRecoilValue(newPagesState);
 
-    const togglePopoverActive = useCallback(() => setPopoverActive((popoverActive) => !popoverActive), []);
-    const activator = <Button onClick={togglePopoverActive}>Sales channels</Button>;
-
-    const handleTaggedWithChange = useCallback((value) => setTaggedWith(value), []);
+    const handleTaggedWithChange = useCallback((value) => setSelected(value), []);
     const handleQueryValueChange = useCallback((value) => setQueryValue(value), []);
-    const handleTaggedWithRemove = useCallback(() => setTaggedWith(null), []);
+    const handleTaggedWithRemove = useCallback(() => setSelected(null), []);
 
     const handleQueryValueRemove = useCallback(() => {
         setQueryValue('');
@@ -94,22 +87,11 @@ function ResourceListPage(props) {
         },
     ];
 
-    const appliedFilters = !isEmpty(taggedWith)
-        ? [
-              {
-                  key: 'taggedWith3',
-                  label: disambiguateLabel('taggedWith3', taggedWith),
-                  onRemove: handleTaggedWithRemove,
-              },
-          ]
-        : [];
-
     const filterControl = (
         <Filters
             queryPlaceholder="Filter Pages"
             queryValue={queryValue}
             filters={filters}
-            appliedFilters={appliedFilters}
             onQueryChange={handleQueryValueChange}
             onQueryClear={handleQueryValueRemove}
             onClearAll={handleClearAll}

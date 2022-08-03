@@ -6,6 +6,8 @@ function ButtonSort() {
     const [popoverActive, setPopoverActive] = useState(false);
     const [selected, setSelected] = useState(['Newest update']);
 
+    const [sortValue, setSortValue] = useState('DATE_MODIFIED_DESC');
+
     const togglePopoverActive = useCallback(() => setPopoverActive((popoverActive) => !popoverActive), []);
 
     const handleChange = useCallback((value) => setSelected(value), []);

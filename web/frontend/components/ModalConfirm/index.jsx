@@ -16,6 +16,7 @@ function ModalConfirm(props) {
     const setTitle = useSetRecoilState(newTitle);
     const setContent = useSetRecoilState(newContent);
 
+    //Handle hiden modal
     const handleClose = useCallback(() => {
         props.setActive(false);
     }, []);
@@ -47,9 +48,10 @@ function ModalConfirm(props) {
                         }
                     }
                 })
-
                 .catch((err) => console.log(err));
-        } else if (props.dataModal?.hasOwnProperty('page')) {
+        }
+        //Action unsave changes
+        else if (props.dataModal?.hasOwnProperty('page')) {
             setContent(props.dataModal.page.body_html);
             setTitle(props.dataModal.page.title);
             handleClose();
