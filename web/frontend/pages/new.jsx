@@ -10,7 +10,7 @@ import ModalConfirm from '../components/ModalConfirm';
 import BannerError from '../components/BannerError';
 import Editor from '../components/Editor';
 import VisibilityPage from '../components/VisibilityPage';
-import SearchPreview from '../components/SarchPreview';
+import SearchPreview from '../components/SearchPreview';
 import InputTitle from '../components/InputTitle';
 
 export default function PageName() {
@@ -50,11 +50,9 @@ export default function PageName() {
                     navigate('/');
                 } else {
                     setErrorMessage(Object.entries(data.response.body.errors));
-                    console.log(Object.entries(data.response.body.errors)[0].includes('title'));
                 }
                 setShowLoading(false);
             })
-
             .catch((err) => console.log(err));
     };
 

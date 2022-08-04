@@ -19,8 +19,8 @@ import {
 import { useAuthenticatedFetch } from '../hooks';
 import ResourceListPage from '../components/ResourceListPage';
 import BannerAccess from '../components/BannerAccess';
-import { useRecoilState } from 'recoil';
-import { newPagesState } from '../recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
+import { newContent, newPagesState, newTitle } from '../recoil';
 
 export default function HomePage() {
     const fetchAPI = useAuthenticatedFetch();
@@ -28,6 +28,9 @@ export default function HomePage() {
     const [pages, setPages] = useRecoilState(newPagesState);
     const [isLoading, setIsLoading] = useState(false);
     const [selected, setSelected] = useState(0);
+
+    const setTitle = useSetRecoilState(newTitle);
+    const setContent = useSetRecoilState(newContent);
 
     //Get all pages
     useEffect(() => {
@@ -41,7 +44,6 @@ export default function HomePage() {
             .then((data) => {
                 setIsLoading(false);
                 setPages(data);
-                // console.log(data);
             })
             .catch((err) => console.log(err));
     }, []);
@@ -118,7 +120,11 @@ export default function HomePage() {
                 primaryAction={
                     !isLoading && {
                         content: 'Add page',
-                        onAction: () => navigate('/new'),
+                        onAction: () => {
+                            setTitle('');
+                            setContent('');
+                            navigate('/new');
+                        },
                     }
                 }
             >

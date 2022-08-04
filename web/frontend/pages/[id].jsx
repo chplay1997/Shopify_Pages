@@ -21,12 +21,14 @@ import ModalConfirm from '../components/ModalConfirm';
 import BannerError from '../components/BannerError';
 import Editor from '../components/Editor';
 import VisibilityPage from '../components/VisibilityPage';
-import SearchPreview from '../components/SarchPreview';
+import SearchPreview from '../components/SearchPreview';
 import InputTitle from '../components/InputTitle';
 import SkeletonSinglePage from '../components/SkeletonSinglePage';
+import { useNavigate } from '@shopify/app-bridge-react';
 
 export default function QRCodeEdit() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const fetchAPI = useAuthenticatedFetch();
     const [isLoading, setIsLoading] = useState(false);
     const [page, setPage] = useState('');
@@ -73,13 +75,16 @@ export default function QRCodeEdit() {
         fetchAPI(`/api/page/${id}`, options)
             .then((res) => res.json())
             .then((data) => {
-                setPage(data);
+                if (data.response?.code === 404) {
+                    navigate('/NotFound');
+                }
 
+                setPage(data);
                 setTitle(data.title);
                 setContent(data.body_html);
+                setUrl(data.handle);
                 // setPageTittle(data.title);
                 // setDescription(data.body_html);
-                setUrl(data.handle);
 
                 setIsLoading(false);
             })
@@ -176,7 +181,12 @@ export default function QRCodeEdit() {
             {showLoading && <Loading />}
 
             <Page
-                breadcrumbs={[{ content: 'Settings', url: '/' }]}
+                breadcrumbs={[
+                    {
+                        content: 'Settings',
+                        url: '/',
+                    },
+                ]}
                 title="page 10"
                 secondaryActions={[
                     { content: 'Duplicate', icon: DuplicateMinor, disabled: true },

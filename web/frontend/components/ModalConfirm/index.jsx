@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 
 import { useAuthenticatedFetch } from '../../hooks';
-import { newContent, newPagesState, newTitle } from '../../recoil';
+import { newContent, newMessageError, newPagesState, newTitle } from '../../recoil';
 
 function ModalConfirm(props) {
     const fetchAPI = useAuthenticatedFetch();
@@ -15,6 +15,7 @@ function ModalConfirm(props) {
     const setPages = useSetRecoilState(newPagesState);
     const setTitle = useSetRecoilState(newTitle);
     const setContent = useSetRecoilState(newContent);
+    const setMessageError = useSetRecoilState(newMessageError);
 
     //Handle hiden modal
     const handleClose = useCallback(() => {
@@ -58,6 +59,7 @@ function ModalConfirm(props) {
         } else {
             navigate('/');
         }
+        setMessageError([]);
     };
 
     return (

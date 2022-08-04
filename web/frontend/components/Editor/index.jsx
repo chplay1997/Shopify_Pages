@@ -17,6 +17,7 @@ function Editor() {
                 <CKEditor
                     editor={ClassicEditor}
                     data={content}
+                    value={content}
                     onChange={(event, editor) => {
                         const data = editor.getData();
                         handleChangeContent(data);

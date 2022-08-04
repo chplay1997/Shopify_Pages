@@ -1,22 +1,26 @@
-import { Card, EmptyState, Page } from "@shopify/polaris";
-import { notFoundImage } from "../assets";
+import { useNavigate } from '@shopify/app-bridge-react';
+import { Card, EmptyState, Page } from '@shopify/polaris';
 
 export default function NotFound() {
-  return (
-    <Page>
-      <Card>
-        <Card.Section>
-          <EmptyState
-            heading="There is no page at this address"
-            image={notFoundImage}
-          >
-            <p>
-              Check the URL and try again, or use the search bar to find what
-              you need.
-            </p>
-          </EmptyState>
-        </Card.Section>
-      </Card>
-    </Page>
-  );
+    const navigate = useNavigate();
+
+    return (
+        <Page>
+            <Card>
+                <Card.Section>
+                    <EmptyState
+                        action={{
+                            content: 'Go to Pages',
+                            onClick: () => {
+                                navigate('/');
+                            },
+                        }}
+                        heading="The Page you're looking for couldn't be found"
+                    >
+                        <p>Check the web address and try again, or try navigating to the Page from Pages.</p>
+                    </EmptyState>
+                </Card.Section>
+            </Card>
+        </Page>
+    );
 }
