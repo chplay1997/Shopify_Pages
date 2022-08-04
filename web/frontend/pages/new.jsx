@@ -16,7 +16,7 @@ import InputTitle from '../components/InputTitle';
 export default function PageName() {
     const navigate = useNavigate();
     const fetchAPI = useAuthenticatedFetch();
-    const [selected, setSelected] = useState(['Hidden']);
+    const [selected, setSelected] = useState(['Visible']);
 
     const [showLoading, setShowLoading] = useState(false);
     const [activeModal, setActiveModal] = useState(false);
@@ -27,7 +27,6 @@ export default function PageName() {
     const [content, setContent] = useRecoilState(newContent);
     const [errorMessage, setErrorMessage] = useRecoilState(newMessageError);
 
-    console.log(title);
     const logoFrame = {
         width: 124,
         contextualSaveBarSource:

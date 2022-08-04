@@ -38,7 +38,7 @@ function ResourceListPage() {
     };
 
     //Delete list pages
-    const handleDeletePageCheckbox = (e) => {
+    const handleDeletePageCheckbox = () => {
         setDataModal({
             title: `Delete ${selectedItems.length} page?`,
             primaryAction: `Delete ${selectedItems.length} page`,
@@ -140,8 +140,20 @@ function ResourceListPage() {
             );
         }
         const { id, title, body_html, updated_at } = item;
-        let time = Number.parseInt((new Date() - new Date(updated_at)) / 60000);
-        let viewTime = time < 1 ? 'Just now' : time + ' minutes ago';
+
+        //Set up view time
+        let viewTime;
+        const currentDate = new Date();
+        const pageUpdatedAt = new Date(updated_at);
+        if (currentDate.getDay() - pageUpdatedAt.getDay() === 1) {
+            viewTime = `Yesterday at ${pageUpdatedAt.toLocaleTimeString()}`;
+        } else if (currentDate.getDay() - pageUpdatedAt.getDay() > 1) {
+            viewTime = pageUpdatedAt.toLocaleString();
+        } else {
+            let time = Number.parseInt((new Date() - new Date(updated_at)) / 60000);
+            viewTime = time < 2 ? 'Just now' : time < 60 ? time + ' minutes ago' : Math.floor(time / 60) + ' hour ago';
+        }
+
         return (
             <ResourceItem id={id} url={`/${id}`} accessibilityLabel={`View details for ${title}`} name={title}>
                 <h3>
@@ -151,23 +163,6 @@ function ResourceListPage() {
                 <div>{viewTime}</div>
             </ResourceItem>
         );
-    }
-
-    function disambiguateLabel(key, value) {
-        switch (key) {
-            case 'taggedWith3':
-                return `Visibility is ${value}`;
-            default:
-                return value;
-        }
-    }
-
-    function isEmpty(value) {
-        if (Array.isArray(value)) {
-            return value.length === 0;
-        } else {
-            return value === '' || value == null;
-        }
     }
 }
 

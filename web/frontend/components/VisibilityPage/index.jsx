@@ -29,7 +29,7 @@ function VisibilityPage(props) {
                     choices={[
                         {
                             label: `Visible${props.selected[0] === 'Hidden' ? '' : currentDate}`,
-                            value: `Visible ${currentDate}`,
+                            value: `Visible`,
                         },
                         { label: 'Hidden', value: 'Hidden' },
                     ]}

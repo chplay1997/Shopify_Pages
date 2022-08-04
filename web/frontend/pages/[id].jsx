@@ -1,11 +1,18 @@
 import { useParams } from 'react-router-dom';
-import { Card, Page, Layout, FormLayout, PageActions, Frame, ContextualSaveBar, Banner, Link } from '@shopify/polaris';
+import {
+    Card,
+    Page,
+    Layout,
+    FormLayout,
+    PageActions,
+    Frame,
+    ContextualSaveBar,
+    Toast,
+    Loading,
+} from '@shopify/polaris';
 import { ViewMinor, DuplicateMinor } from '@shopify/polaris-icons';
-import { Loading } from '@shopify/app-bridge-react';
 import { useAuthenticatedFetch } from '../hooks';
 import { useEffect, useState } from 'react';
-
-import { useNavigate } from '@shopify/app-bridge-react';
 
 import { useRecoilState } from 'recoil';
 import { newMessageError, newContent, newTitle, newPageTittle, newDescription, newUrl } from '../recoil';
@@ -24,12 +31,11 @@ export default function QRCodeEdit() {
     const [isLoading, setIsLoading] = useState(false);
     const [page, setPage] = useState('');
     const [showSaveBar, setShowSaveBar] = useState(false);
-
-    const navigate = useNavigate();
-    const [selected, setSelected] = useState(['Hidden']);
+    const [selected, setSelected] = useState(['Visible']);
 
     const [showLoading, setShowLoading] = useState(false);
     const [activeModal, setActiveModal] = useState(false);
+    const [activeToast, setActiveToast] = useState(false);
     const [dataModal, setDataModal] = useState({});
 
     //Recoil state
@@ -67,7 +73,6 @@ export default function QRCodeEdit() {
         fetchAPI(`/api/page/${id}`, options)
             .then((res) => res.json())
             .then((data) => {
-                console.log(data);
                 setPage(data);
 
                 setTitle(data.title);
@@ -103,6 +108,8 @@ export default function QRCodeEdit() {
                 if (data.hasOwnProperty('success')) {
                     setPage((prev) => ({ ...prev, title: title, body_htm: content }));
                     setShowSaveBar(false);
+                    setActiveToast(true);
+                    setTimeout(() => setActiveToast(false), 3000);
                 } else {
                     console.log(data);
                     setErrorMessage([['id', [data.response.body.errors]]]);
@@ -137,6 +144,10 @@ export default function QRCodeEdit() {
         setActiveModal(true);
     };
 
+    //Show toast with save is successful
+    const toggleActiveToast = () => setActiveToast(!activeToast);
+    const toastMarkup = activeToast ? <Toast content="Page was saved" onDismiss={toggleActiveToast} /> : null;
+
     /* Loading action and markup that uses App Bridge and Polaris components */
     if (isLoading) {
         return <SkeletonSinglePage />;
@@ -147,6 +158,7 @@ export default function QRCodeEdit() {
             {/* Modal confirm cancel */}
 
             <ModalConfirm active={activeModal} setActive={setActiveModal} dataModal={dataModal} />
+            {toastMarkup}
 
             {showSaveBar && (
                 <ContextualSaveBar
@@ -167,11 +179,11 @@ export default function QRCodeEdit() {
                 breadcrumbs={[{ content: 'Settings', url: '/' }]}
                 title="page 10"
                 secondaryActions={[
-                    { content: 'Duplicate', icon: DuplicateMinor },
-                    { content: 'View page', icon: ViewMinor },
+                    { content: 'Duplicate', icon: DuplicateMinor, disabled: true },
+                    { content: 'View page', icon: ViewMinor, disabled: true },
                 ]}
                 pagination={{
-                    hasPrevious: true,
+                    hasPrevious: false,
                     hasNext: false,
                 }}
             >
